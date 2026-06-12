@@ -1,11 +1,11 @@
 # Graph Report - .  (2026-06-12)
 
 ## Corpus Check
-- 4 files · ~393 words
+- 4 files · ~2,757 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 12 nodes · 11 edges · 4 communities detected
+- 30 nodes · 48 edges · 8 communities detected
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
@@ -14,46 +14,85 @@
 - [[_COMMUNITY_Community 1|Community 1]]
 - [[_COMMUNITY_Community 2|Community 2]]
 - [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `recursively_list_pages()` - 4 edges
-2. `SBPX` - 2 edges
-3. `SBPX` - 2 edges
-4. `list_pages()` - 2 edges
-5. `TestItemRunner` - 1 edges
-6. `Documenter` - 1 edges
+1. `SBPX` - 20 edges
+2. `_derivative_operator_info()` - 6 edges
+3. `describe_sources()` - 5 edges
+4. `describe_derivative_operator()` - 5 edges
+5. `_format_interior_rows()` - 5 edges
+6. `_source_row()` - 4 edges
+7. `recursively_list_pages()` - 4 edges
+8. `_source_operator_info()` - 3 edges
+9. `_instantiate_source()` - 3 edges
+10. `_resolve_source()` - 3 edges
 
 ## Surprising Connections (you probably didn't know these)
-- None detected - all connections are within the same source files.
+- `SBPX` --defines--> `available_sources()`  [EXTRACTED]
+  src/SBPX.jl → src/SBPX.jl  _Bridges community 1 → community 4_
+- `SBPX` --defines--> `describe_derivative_operator()`  [EXTRACTED]
+  src/SBPX.jl → src/SBPX.jl  _Bridges community 1 → community 5_
+- `SBPX` --defines--> `_source_row()`  [EXTRACTED]
+  src/SBPX.jl → src/SBPX.jl  _Bridges community 1 → community 6_
+- `SBPX` --defines--> `_derivative_operator_info()`  [EXTRACTED]
+  src/SBPX.jl → src/SBPX.jl  _Bridges community 1 → community 2_
+- `SBPX` --defines--> `_format_interior_rows()`  [EXTRACTED]
+  src/SBPX.jl → src/SBPX.jl  _Bridges community 1 → community 3_
 
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.83
-Nodes (3): Documenter, list_pages(), recursively_list_pages()
+Cohesion: 0.38
+Nodes (5): Documenter, list_pages(), recursively_list_pages(), SBPX, TestItemRunner
 
 ### Community 1 - "Community 1"
-Cohesion: 0.67
-Nodes (1): SBPX
+Cohesion: 0.47
+Nodes (5): InteractiveUtils, _instantiate_source(), _resolve_source(), SBPX, _source_operator_info()
 
 ### Community 2 - "Community 2"
-Cohesion: 0.67
-Nodes (2): SBPX, TestItemRunner
+Cohesion: 0.5
+Nodes (4): _boundary_relative_offsets(), _derivative_operator_info(), _format_boundary_rows(), _periodic_coefficients()
 
 ### Community 3 - "Community 3"
+Cohesion: 0.5
+Nodes (4): _format_coefficient(), _format_interior_rows(), _format_offset(), _interior_stencil_pairs()
+
+### Community 4 - "Community 4"
+Cohesion: 0.67
+Nodes (3): available_sources(), describe_sources(), _source_category()
+
+### Community 5 - "Community 5"
+Cohesion: 2.0
+Nodes (2): describe_derivative_operator(), _print_table()
+
+### Community 6 - "Community 6"
+Cohesion: 1.0
+Nodes (2): _source_dissipation_info(), _source_row()
+
+### Community 7 - "Community 7"
 Cohesion: 1.0
 Nodes (0): 
 
 ## Knowledge Gaps
-- **2 isolated node(s):** `TestItemRunner`, `Documenter`
+- **3 isolated node(s):** `InteractiveUtils`, `TestItemRunner`, `Documenter`
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 3`** (2 nodes): `is_valid_string()`, `test-basic-test.jl`
+- **Thin community `Community 5`** (2 nodes): `describe_derivative_operator()`, `_print_table()`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 6`** (2 nodes): `_source_dissipation_info()`, `_source_row()`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 7`** (2 nodes): `year_from_name()`, `test-basic-test.jl`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SBPX` connect `Community 2` to `Community 0`?**
-  _High betweenness centrality (0.145) - this node is a cross-community bridge._
-- **What connects `TestItemRunner`, `Documenter` to the rest of the system?**
-  _2 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `SBPX` connect `Community 1` to `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 6`?**
+  _High betweenness centrality (0.385) - this node is a cross-community bridge._
+- **Why does `_derivative_operator_info()` connect `Community 2` to `Community 1`, `Community 3`, `Community 5`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **What connects `InteractiveUtils`, `TestItemRunner`, `Documenter` to the rest of the system?**
+  _3 weakly-connected nodes found - possible documentation gaps or missing edges._
