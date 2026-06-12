@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier
+AddPrecommitUpdateCI: false
+Authors: Stamatis Vretinaris <svretina@gmail.com>
+JuliaMinVersion: '1.10'
+License: MIT
+LicenseCopyrightHolders: Stamatis Vretinaris
+PackageName: SBPX
+PackageOwner: svretina
+PackageUUID: 8853e93d-8700-580e-9996-fa0987d5fae6
+StrategyConfirmIncluded: false
+StrategyLevel: 2
+StrategyReviewExcluded: false
+_src_path: /home/svretina/.julia/packages/BestieTemplate/6QVd6

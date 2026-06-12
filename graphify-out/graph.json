@@ -1,0 +1,250 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "SBPX.jl",
+      "file_type": "code",
+      "source_file": "src/SBPX.jl",
+      "source_location": "L1",
+      "id": "src_sbpx_jl",
+      "community": 1,
+      "norm_label": "sbpx.jl"
+    },
+    {
+      "label": "SBPX",
+      "file_type": "code",
+      "source_file": "src/SBPX.jl",
+      "source_location": "L1",
+      "id": "sbpx_sbpx",
+      "community": 1,
+      "norm_label": "sbpx"
+    },
+    {
+      "label": "hello_world()",
+      "file_type": "code",
+      "source_file": "src/SBPX.jl",
+      "source_location": "L7",
+      "id": "sbpx_hello_world",
+      "community": 1,
+      "norm_label": "hello_world()"
+    },
+    {
+      "label": "runtests.jl",
+      "file_type": "code",
+      "source_file": "test/runtests.jl",
+      "source_location": "L1",
+      "id": "test_runtests_jl",
+      "community": 2,
+      "norm_label": "runtests.jl"
+    },
+    {
+      "label": "SBPX",
+      "file_type": "code",
+      "source_file": "docs/make.jl",
+      "source_location": "L1",
+      "id": "sbpx",
+      "community": 2,
+      "norm_label": "sbpx"
+    },
+    {
+      "label": "TestItemRunner",
+      "file_type": "code",
+      "source_file": "test/runtests.jl",
+      "source_location": "L2",
+      "id": "testitemrunner",
+      "community": 2,
+      "norm_label": "testitemrunner"
+    },
+    {
+      "label": "test-basic-test.jl",
+      "file_type": "code",
+      "source_file": "test/test-basic-test.jl",
+      "source_location": "L1",
+      "id": "test_test_basic_test_jl",
+      "community": 3,
+      "norm_label": "test-basic-test.jl"
+    },
+    {
+      "label": "is_valid_string()",
+      "file_type": "code",
+      "source_file": "test/test-basic-test.jl",
+      "source_location": "L7",
+      "id": "test_basic_test_is_valid_string",
+      "community": 3,
+      "norm_label": "is_valid_string()"
+    },
+    {
+      "label": "make.jl",
+      "file_type": "code",
+      "source_file": "docs/make.jl",
+      "source_location": "L1",
+      "id": "docs_make_jl",
+      "community": 0,
+      "norm_label": "make.jl"
+    },
+    {
+      "label": "Documenter",
+      "file_type": "code",
+      "source_file": "docs/make.jl",
+      "source_location": "L2",
+      "id": "documenter",
+      "community": 0,
+      "norm_label": "documenter"
+    },
+    {
+      "label": "recursively_list_pages()",
+      "file_type": "code",
+      "source_file": "docs/make.jl",
+      "source_location": "L12",
+      "id": "make_recursively_list_pages",
+      "community": 0,
+      "norm_label": "recursively_list_pages()"
+    },
+    {
+      "label": "list_pages()",
+      "file_type": "code",
+      "source_file": "docs/make.jl",
+      "source_location": "L54",
+      "id": "make_list_pages",
+      "community": 0,
+      "norm_label": "list_pages()"
+    }
+  ],
+  "links": [
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "src/SBPX.jl",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "src_sbpx_jl",
+      "_tgt": "sbpx_sbpx",
+      "source": "src_sbpx_jl",
+      "target": "sbpx_sbpx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "src/SBPX.jl",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "sbpx_sbpx",
+      "_tgt": "sbpx_hello_world",
+      "source": "sbpx_sbpx",
+      "target": "sbpx_hello_world",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "test/runtests.jl",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "test_runtests_jl",
+      "_tgt": "sbpx",
+      "source": "test_runtests_jl",
+      "target": "sbpx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "test/runtests.jl",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "test_runtests_jl",
+      "_tgt": "testitemrunner",
+      "source": "test_runtests_jl",
+      "target": "testitemrunner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/make.jl",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_src": "docs_make_jl",
+      "_tgt": "sbpx",
+      "source": "sbpx",
+      "target": "docs_make_jl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "test/test-basic-test.jl",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "test_test_basic_test_jl",
+      "_tgt": "test_basic_test_is_valid_string",
+      "source": "test_test_basic_test_jl",
+      "target": "test_basic_test_is_valid_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/make.jl",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "docs_make_jl",
+      "_tgt": "documenter",
+      "source": "docs_make_jl",
+      "target": "documenter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/make.jl",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_src": "docs_make_jl",
+      "_tgt": "make_recursively_list_pages",
+      "source": "docs_make_jl",
+      "target": "make_recursively_list_pages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/make.jl",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_src": "docs_make_jl",
+      "_tgt": "make_list_pages",
+      "source": "docs_make_jl",
+      "target": "make_list_pages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/make.jl",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_src": "make_recursively_list_pages",
+      "_tgt": "make_recursively_list_pages",
+      "source": "make_recursively_list_pages",
+      "target": "make_recursively_list_pages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/make.jl",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_src": "make_list_pages",
+      "_tgt": "make_recursively_list_pages",
+      "source": "make_recursively_list_pages",
+      "target": "make_list_pages",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": []
+}
