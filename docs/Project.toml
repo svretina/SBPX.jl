@@ -5,6 +5,7 @@ SBPX = "8853e93d-8700-580e-9996-fa0987d5fae6"
 
 [compat]
 Documenter = "1"
+LiveServer = "1.5.0"
 
 [sources]
 SBPX = {path = ".."}
