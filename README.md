@@ -110,6 +110,41 @@ describe_derivative_operator(
 )
 ```
 
+### Spherical operators
+
+Spherical-symmetry SBP operators from
+[`SphericalSBPOperators.jl`](https://github.com/svretina/SphericalSBPOperators.jl)
+are re-exported by SBPX. Construct a collocated operator set on `[0, R]` with:
+
+```julia
+using SummationByPartsOperators: MattssonNordström2004
+
+source = MattssonNordström2004()
+
+# Collocated SBP4: N is the number of subintervals.
+sbp4 = spherical_operators(source;
+    accuracy_order = 4,
+    N = 32,
+    R = 1.0,
+    p = 2,
+    grid = :collocated,
+)
+
+# Collocated paper SBP6.
+sbp6 = spherical_operators(source;
+    accuracy_order = 6,
+    N = 64,
+    R = 1.0,
+    p = 2,
+    grid = :collocated,
+)
+```
+
+The public spherical API includes `spherical_operators`, the operator types,
+`scalar_mass`, `vector_mass`, `has_origin_node`, and the gradient/divergence
+application helpers. The complete upstream API remains available under the
+`SphericalSBPOperators` namespace.
+
 Example output:
 
 ```text

@@ -9,7 +9,12 @@ projects = ["test", "docs"]
 [deps]
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 SummationByPartsOperators = "9f78cca6-572e-554e-b819-917d2f1cf240"
+SphericalSBPOperators = "54f2a669-6442-4ec9-9f33-60161b4634ca"
 
 [compat]
 SummationByPartsOperators = "0.5.95"
-julia = "1.10"
+SphericalSBPOperators = "0.1"
+julia = "1.11"
+
+[sources]
+SphericalSBPOperators = {url = "https://github.com/svretina/SphericalSBPOperators.jl.git", rev = "f5f3fbbb94380be102c9b0be5f50993bef5414dd"}

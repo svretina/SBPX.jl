@@ -2,8 +2,28 @@ module SBPX
 
 import InteractiveUtils
 import SummationByPartsOperators as SBPO
+import SphericalSBPOperators
+using SphericalSBPOperators: AbstractSphericalOperators,
+                             NonDiagonalMassSphericalOperators,
+                             StaggeredSphericalOperators,
+                             apply_divergence,
+                             apply_even_gradient,
+                             apply_odd_derivative,
+                             diagnose_staggered,
+                             has_origin_node,
+                             interpret_diagnostics_staggered,
+                             scalar_mass,
+                             spherical_operators,
+                             validate_staggered,
+                             vector_mass
 
 export available_sources, describe_sources, describe_derivative_operator
+export SphericalSBPOperators
+export spherical_operators, AbstractSphericalOperators
+export NonDiagonalMassSphericalOperators, StaggeredSphericalOperators
+export scalar_mass, vector_mass, has_origin_node
+export apply_even_gradient, apply_odd_derivative, apply_divergence
+export validate_staggered, diagnose_staggered, interpret_diagnostics_staggered
 
 const SOURCE_YEAR_OVERRIDES = Dict(
     :LanczosLowNoise => 2008,

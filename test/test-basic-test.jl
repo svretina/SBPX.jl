@@ -6,6 +6,23 @@
     @test allunique(sources)
 end
 
+@testitem "spherical SBP operators are available through SBPX" tags=[:integration] begin
+    source = SBPX.SphericalSBPOperators.MattssonNordström2004()
+    operators = SBPX.spherical_operators(source;
+                                          accuracy_order=4,
+                                          N=8,
+                                          R=8,
+                                          mode=SBPX.SphericalSBPOperators.SafeMode())
+
+    @test operators isa SBPX.NonDiagonalMassSphericalOperators
+    @test SBPX.has_origin_node(operators)
+    @test size(operators.D) == (9, 9)
+    @test SBPX.scalar_mass(operators) === operators.S
+    @test SBPX.vector_mass(operators) === operators.V
+    @test length(SBPX.apply_even_gradient(operators, operators.r)) == length(operators.r)
+    @test length(SBPX.apply_divergence(operators, zero.(operators.r))) == length(operators.r)
+end
+
 @testitem "available_sources sorts by year by default" tags=[:unit, :fast] begin
     sources = SBPX.available_sources()
     year_from_name(name::Symbol) = begin
