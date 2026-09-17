@@ -3,27 +3,12 @@ module SBPX
 import InteractiveUtils
 import SummationByPartsOperators as SBPO
 import SphericalSBPOperators
-using SphericalSBPOperators: AbstractSphericalOperators,
-                             NonDiagonalMassSphericalOperators,
-                             StaggeredSphericalOperators,
-                             apply_divergence,
-                             apply_even_gradient,
-                             apply_odd_derivative,
-                             diagnose_staggered,
-                             has_origin_node,
-                             interpret_diagnostics_staggered,
-                             scalar_mass,
-                             spherical_operators,
-                             validate_staggered,
-                             vector_mass
 
-export available_sources, describe_sources, describe_derivative_operator
-export SphericalSBPOperators
-export spherical_operators, AbstractSphericalOperators
-export NonDiagonalMassSphericalOperators, StaggeredSphericalOperators
-export scalar_mass, vector_mass, has_origin_node
-export apply_even_gradient, apply_odd_derivative, apply_divergence
-export validate_staggered, diagnose_staggered, interpret_diagnostics_staggered
+export available_sources, describe_sources, describe_derivative_operator,
+       describe_spherical_operator
+
+const SPHERICAL_SOURCE = :VretinarisSchnetter2026
+const SPHERICAL_SOURCE_NOTE = "spherical collocated SBP4/SBP6 operators; constructed from MattssonNordström2004"
 
 const SOURCE_YEAR_OVERRIDES = Dict(
     :LanczosLowNoise => 2008,
@@ -71,8 +56,11 @@ const PERIODIC_SOURCES = Set((
 """
     available_sources(; sort_by=:year) -> Vector{Symbol}
 
-Return the currently available coefficient sources provided by
-`SummationByPartsOperators.jl`.
+Return the currently available Cartesian and spherical operator sources.
+
+Most entries are coefficient sources provided by `SummationByPartsOperators.jl`.
+`:VretinarisSchnetter2026` identifies the spherical collocated SBP4/SBP6
+operator family provided by `SphericalSBPOperators.jl`.
 
 Supported sort orders are `:year` and `:name`. The default is `:year`,
 ordered from most recent to oldest. Results are always secondarily ordered by
@@ -101,6 +89,7 @@ function available_sources(; sort_by::Symbol=:year)
         year = year_from_name(name)
         push!(source_entries, (name=name, year=year))
     end
+    push!(source_entries, (name=SPHERICAL_SOURCE, year=2026))
 
     unique!(source_entries)
 
@@ -119,6 +108,7 @@ function describe_sources(io::IO=stdout; sort_by::Symbol=:year)
     rows = [_source_row(name) for name in available_sources(; sort_by)]
     headers = ("Source", "Derivs", "Orders", "Dissipation", "Notes")
     grouped = Dict(
+        "Spherical Sources" => Tuple[],
         "Fourier Sources" => Tuple[],
         "Periodic Sources" => Tuple[],
         "Nonperiodic / Specialized Sources" => Tuple[],
@@ -130,7 +120,7 @@ function describe_sources(io::IO=stdout; sort_by::Symbol=:year)
     end
 
     first_section = true
-    for category in ("Nonperiodic / Specialized Sources", "Periodic Sources", "Fourier Sources")
+    for category in ("Spherical Sources", "Nonperiodic / Specialized Sources", "Periodic Sources", "Fourier Sources")
         section_rows = grouped[category]
         isempty(section_rows) && continue
         first_section || println(io)
@@ -152,15 +142,23 @@ nontrivial left and right boundary closure stencils.
 
 `source` may be either a source name `Symbol` such as `:MattssonNordström2004`
 or a `SummationByPartsOperators.SourceOfCoefficients` instance.
+For `:VretinarisSchnetter2026`, this dispatches to `describe_spherical_operator`
+and `derivative_order` must be `1`.
 
 Supported keyword arguments:
 - `variant=:central` for upwind-capable sources
 - `alpha_left=0.5`, `alpha_right=0.5` for `SharanBradyLivescu2022`
 - `stencil_width=nothing` for `Holoborodko2008` and `LanczosLowNoise`
 - `left_offset=nothing` for `Fornberg1998`
+- `N=nothing`, `R=1`, and `p=2` for `VretinarisSchnetter2026`
 """
 function describe_derivative_operator(io::IO, source, derivative_order::Integer,
                                       accuracy_order::Integer; kwargs...)
+    if source === SPHERICAL_SOURCE
+        derivative_order == 1 || throw(ArgumentError("$(SPHERICAL_SOURCE) provides first-derivative gradient/divergence operators; use derivative_order = 1"))
+        return describe_spherical_operator(io, accuracy_order; kwargs...)
+    end
+
     info = _derivative_operator_info(source, derivative_order, accuracy_order; kwargs...)
     source_name = String(info.source_name)
 
@@ -197,12 +195,83 @@ function describe_derivative_operator(io::IO, source, derivative_order::Integer,
     return nothing
 end
 
+"""
+    describe_spherical_operator(io, accuracy_order; N=nothing, R=1, p=2)
+    describe_spherical_operator(accuracy_order; N=nothing, R=1, p=2)
+
+Print the origin closure, a representative interior stencil, and the outer-boundary
+closure for the `VretinarisSchnetter2026` collocated spherical SBP operator family.
+The report contains the even-field gradient `G_even`, odd-field derivative `G_odd`,
+and covariant divergence `D`. `N` is the number of radial subintervals; its default
+is the reproduction resolution from `SphericalSBPOperators.jl` (`32` for SBP4 and
+`64` for SBP6).
+"""
+function describe_spherical_operator(io::IO, accuracy_order::Integer;
+                                     N::Union{Nothing, Integer}=nothing,
+                                     R=1,
+                                     p::Integer=2)
+    accuracy_order in (4, 6) || throw(ArgumentError("$(SPHERICAL_SOURCE) supports accuracy orders 4 and 6"))
+    N_use = isnothing(N) ? (accuracy_order == 4 ? 32 : 64) : Int(N)
+    origin_rows = _spherical_origin_closure_rows(accuracy_order)
+    outer_rows = accuracy_order
+    N_use >= origin_rows + outer_rows + 1 || throw(ArgumentError("N must be at least $(origin_rows + outer_rows + 1) to display distinct origin, interior, and outer-boundary stencils"))
+
+    operators = SphericalSBPOperators.spherical_operators(
+        SphericalSBPOperators.MattssonNordström2004();
+        accuracy_order=Int(accuracy_order), N=N_use, R=R, p=Int(p), grid=:collocated,
+        mode=SphericalSBPOperators.SafeMode(),
+    )
+    grid_spacing = operators.r[2] - operators.r[1]
+    n = length(operators.r)
+    interior_row = fld(origin_rows + 1 + n - outer_rows, 2)
+    matrices = (("G_even", operators.Geven),
+                ("G_odd", operators.Godd),
+                ("D", operators.D))
+
+    println(io, "Source           : ", SPHERICAL_SOURCE)
+    println(io, "Accuracy order   : ", accuracy_order)
+    println(io, "Grid             : collocated, r ∈ [0, ", R, "]")
+    println(io, "Grid spacing     : h = ", _format_coefficient(grid_spacing))
+    println(io, "Metric power     : p = ", p)
+    println(io, "Underlying SBP   : MattssonNordström2004")
+    println(io, "Notes            : ", SPHERICAL_SOURCE_NOTE)
+
+    println(io, "\nOrigin closures")
+    _print_table(io, ("Operator", "Row", "r", "Relative offsets", "Coefficients"),
+                 _spherical_matrix_rows(matrices, operators.r, 1:origin_rows))
+
+    println(io, "\nRepresentative interior stencils")
+    println(io, "The covariant-divergence coefficients depend on radius; the displayed D row is representative.")
+    _print_table(io, ("Operator", "Row", "r", "Relative offsets", "Coefficients"),
+                 _spherical_matrix_rows(matrices, operators.r, interior_row:interior_row))
+
+    println(io, "\nOuter-boundary closures")
+    _print_table(io, ("Operator", "Row", "r", "Relative offsets", "Coefficients"),
+                 _spherical_matrix_rows(matrices, operators.r, (n - outer_rows + 1):n))
+    return nothing
+end
+
+function describe_spherical_operator(accuracy_order::Integer; kwargs...)
+    return describe_spherical_operator(stdout, accuracy_order; kwargs...)
+end
+
 function describe_derivative_operator(source, derivative_order::Integer, accuracy_order::Integer;
                                       kwargs...)
     return describe_derivative_operator(stdout, source, derivative_order, accuracy_order; kwargs...)
 end
 
 function _source_row(name::Symbol)
+    if name === SPHERICAL_SOURCE
+        return (
+            source=String(name),
+            derivatives="G_even, G_odd, D",
+            operator_orders="4,6",
+            dissipation="-",
+            notes=SPHERICAL_SOURCE_NOTE,
+            name=name,
+        )
+    end
+
     derivative_orders, operator_orders = _source_operator_info(name)
     dissipation = _source_dissipation_info(name)
     notes = get(SPECIAL_SOURCE_NOTES, name, "")
@@ -217,7 +286,9 @@ function _source_row(name::Symbol)
 end
 
 function _source_category(name::Symbol)
-    if name in FOURIER_DISSIPATION_SOURCES
+    if name === SPHERICAL_SOURCE
+        return "Spherical Sources"
+    elseif name in FOURIER_DISSIPATION_SOURCES
         return "Fourier Sources"
     elseif name in PERIODIC_SOURCES
         return "Periodic Sources"
@@ -227,7 +298,9 @@ function _source_category(name::Symbol)
 end
 
 function _source_operator_info(name::Symbol)
-    if name === :BeljaddLeFlochMishraParés2017
+    if name === SPHERICAL_SOURCE
+        return "G_even,G_odd,D", "SBP4,SBP6"
+    elseif name === :BeljaddLeFlochMishraParés2017
         return "1,2,3", "d1:any; d2:any; d3:any"
     elseif name === :Fornberg1998
         return "1,2,3,4", "d1:1-10; d2:1-10; d3:1-10; d4:1-10"
@@ -266,7 +339,9 @@ function _source_operator_info(name::Symbol)
 end
 
 function _source_dissipation_info(name::Symbol)
-    if name in FOURIER_DISSIPATION_SOURCES
+    if name === SPHERICAL_SOURCE
+        return "-"
+    elseif name in FOURIER_DISSIPATION_SOURCES
         return "Fourier viscosity"
     elseif name in PERIODIC_DISSIPATION_SOURCES
         return "generic periodic (even order)"
@@ -420,6 +495,38 @@ function _format_coefficient(value)
     end
     denominator(rational) == 1 && return string(numerator(rational))
     return string(numerator(rational), "/", denominator(rational))
+end
+
+_spherical_origin_closure_rows(accuracy_order::Integer) =
+    accuracy_order == 4 ? 7 : 10
+
+function _spherical_matrix_rows(matrices, r, row_indices)
+    rows = Tuple{String, String, String, String, String}[]
+    for (name, matrix) in matrices
+        for row_index in row_indices
+            offsets, coefficients = _spherical_row_stencil(matrix, row_index)
+            push!(rows, (
+                name,
+                "i=$(row_index)",
+                _format_coefficient(r[row_index]),
+                join(_format_offset.(offsets), ", "),
+                join(_format_coefficient.(coefficients), ", "),
+            ))
+        end
+    end
+    return rows
+end
+
+function _spherical_row_stencil(matrix, row_index::Integer)
+    offsets = Int[]
+    coefficients = eltype(matrix)[]
+    for column_index in axes(matrix, 2)
+        coefficient = matrix[row_index, column_index]
+        iszero(coefficient) && continue
+        push!(offsets, column_index - row_index)
+        push!(coefficients, coefficient)
+    end
+    return offsets, coefficients
 end
 
 function _print_table(io::IO, headers, rows)

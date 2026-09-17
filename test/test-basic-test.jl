@@ -6,21 +6,23 @@
     @test allunique(sources)
 end
 
-@testitem "spherical SBP operators are available through SBPX" tags=[:integration] begin
-    source = SBPX.SphericalSBPOperators.MattssonNordström2004()
-    operators = SBPX.spherical_operators(source;
-                                          accuracy_order=4,
-                                          N=8,
-                                          R=8,
-                                          mode=SBPX.SphericalSBPOperators.SafeMode())
+@testitem "spherical SBP source and closures are described" tags=[:integration] begin
+    @test :VretinarisSchnetter2026 in SBPX.available_sources()
 
-    @test operators isa SBPX.NonDiagonalMassSphericalOperators
-    @test SBPX.has_origin_node(operators)
-    @test size(operators.D) == (9, 9)
-    @test SBPX.scalar_mass(operators) === operators.S
-    @test SBPX.vector_mass(operators) === operators.V
-    @test length(SBPX.apply_even_gradient(operators, operators.r)) == length(operators.r)
-    @test length(SBPX.apply_divergence(operators, zero.(operators.r))) == length(operators.r)
+    output = sprint(io -> SBPX.describe_spherical_operator(io, 4; N=12, R=12))
+    @test occursin("Source           : VretinarisSchnetter2026", output)
+    @test occursin("Origin closures", output)
+    @test occursin("Representative interior stencils", output)
+    @test occursin("Outer-boundary closures", output)
+    @test occursin("G_even", output)
+    @test occursin("G_odd", output)
+    @test occursin("D", output)
+    @test occursin("i=1", output)
+    @test occursin("i=13", output)
+
+    redirected = sprint(io -> SBPX.describe_derivative_operator(io, :VretinarisSchnetter2026, 1, 4;
+                                                                 N=12, R=12))
+    @test redirected == output
 end
 
 @testitem "available_sources sorts by year by default" tags=[:unit, :fast] begin

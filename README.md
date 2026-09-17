@@ -112,38 +112,100 @@ describe_derivative_operator(
 
 ### Spherical operators
 
-Spherical-symmetry SBP operators from
+SBPX exposes the spherical collocated SBP4/SBP6 family from
 [`SphericalSBPOperators.jl`](https://github.com/svretina/SphericalSBPOperators.jl)
-are re-exported by SBPX. Construct a collocated operator set on `[0, R]` with:
+as `:VretinarisSchnetter2026`. Its report contains the origin closure, a
+representative interior stencil, and the outer-boundary closure for `G_even`,
+`G_odd`, and the covariant divergence `D`.
+
+#### Exact SBP4 example with `h = 1`
+
+The spherical report builds a collocated grid with `N + 1` nodes on `[0, R]`,
+so its grid spacing is `h = R / N`. Set `R = N // 1` to make `h = 1` while
+keeping the construction and printed coefficients in exact rational arithmetic.
+The `//` notation creates a Julia rational number; do not use `32.0` when you
+want the exact-coefficient report.
 
 ```julia
-using SummationByPartsOperators: MattssonNordström2004
-
-source = MattssonNordström2004()
-
-# Collocated SBP4: N is the number of subintervals.
-sbp4 = spherical_operators(source;
-    accuracy_order = 4,
+# SBP4 on r = 0, 1, ..., 32. All reported coefficients are rational.
+describe_spherical_operator(4;
     N = 32,
-    R = 1.0,
+    R = 32 // 1,
     p = 2,
-    grid = :collocated,
-)
-
-# Collocated paper SBP6.
-sbp6 = spherical_operators(source;
-    accuracy_order = 6,
-    N = 64,
-    R = 1.0,
-    p = 2,
-    grid = :collocated,
 )
 ```
 
-The public spherical API includes `spherical_operators`, the operator types,
-`scalar_mass`, `vector_mass`, `has_origin_node`, and the gradient/divergence
-application helpers. The complete upstream API remains available under the
-`SphericalSBPOperators` namespace.
+The common source-inspection entry point provides the same report. This is
+especially useful when `describe_derivative_operator` is already part of a
+script or notebook workflow:
+
+```julia
+describe_derivative_operator(:VretinarisSchnetter2026, 1, 4;
+    N = 32,
+    R = 32 // 1,
+    p = 2,
+)
+```
+
+#### Exact SBP6 example with `h = 1`
+
+The publication SBP6 reproduction resolution uses `N = 64`. Choosing the same
+radius gives the exact unit-spaced grid `r = 0, 1, ..., 64`:
+
+```julia
+describe_derivative_operator(:VretinarisSchnetter2026, 1, 6;
+    N = 64,
+    R = 64 // 1,
+    p = 2,
+)
+```
+
+`p = 2` is the spherical metric power. The report supports the corresponding
+cylindrical form with `p = 1`, but the examples above reproduce the usual
+spherical case. The default resolutions are `N = 32` for SBP4 and `N = 64` for
+SBP6; provide `R = N // 1` explicitly whenever a unit-step, rational report is
+important.
+
+#### Reading the spherical report
+
+The header records the source family, requested accuracy, physical grid,
+spacing, metric power, and the Cartesian SBP operator used internally. For the
+examples above it says `h = 1`, which means the numbers in the tables are the
+stencil coefficients themselves rather than coefficients divided by an
+additional grid spacing.
+
+Each table uses the following columns:
+
+| Column | Meaning |
+| --- | --- |
+| `Operator` | `G_even` differentiates an even scalar field; `G_odd` differentiates an odd radial-flux field; `D` is the compatible covariant divergence. |
+| `Row` | One-based row of the matrix, written as `i=k`. |
+| `r` | Radius of that row. With `h = 1`, it is the corresponding integer grid coordinate. |
+| `Relative offsets` | Column positions relative to the current row. For example, `-2, -1, +1, +2` uses values at `i-2`, `i-1`, `i+1`, and `i+2`. |
+| `Coefficients` | Coefficients paired positionally with the offsets. They are printed as exact rational numbers. |
+
+The report is divided into three regions:
+
+- **Origin closures** are the special rows near `r = 0`. They enforce the
+  even/odd parity conditions and regularize the coordinate singularity. For
+  example, the first `G_even` row is empty because the derivative of an even
+  field vanishes at the origin, while the first `D` row is the special
+  removable-singularity divergence rule.
+
+- **Representative interior stencils** show a row far from both closures.
+  `G_even` and `G_odd` use the familiar translation-invariant Cartesian SBP
+  stencil there. `D` is intentionally shown at one representative radius:
+  its coefficients vary with `r` because it discretizes
+  `∂ᵣu + p u/r`, not a constant-coefficient derivative.
+
+- **Outer-boundary closures** are the final rows adjacent to `r = R`. They
+  differ from the interior stencil so that the discrete SBP identity holds at
+  the physical boundary.
+
+For instance, an SBP4 origin row such as
+`G_odd | i=1 | 0 | +1, +2 | 4/3, -1/6` means
+`(G_odd u)_1 = (4/3)u_2 - (1/6)u_3` on the unit-step grid. The entries in every
+other row should be read in exactly the same offset/coefficient pairing.
 
 Example output:
 
